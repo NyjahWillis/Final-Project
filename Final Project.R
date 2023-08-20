@@ -23,4 +23,5 @@ smart_data$Age_cat <- factor(ifelse(is.na(smart_data$Age),NA,
 																labels=c("28 years or younger",
 																				 "Between 29 - 43 years",
 																				 "44 and older "))
+hist(smart_data$WG.Time)
 

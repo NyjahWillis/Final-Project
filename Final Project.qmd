@@ -60,7 +60,12 @@ label = list(
 table1
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+#Figure 1
+
+```{r}
+hist(smart_data$WG.Time)
+```
+
 
 ```{r}
 
