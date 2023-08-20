@@ -67,6 +67,13 @@ hist(smart_data$WG.Time)
 ```
 
 
-```{r}
+#Functions 
 
+```{r}
+smart_mean <- function(x) {
+	n <-length(x)
+	mean_val <- sum(x)/n
+	return(mean_val)
+}
+smart_mean(smart_data$Age)
 ```
