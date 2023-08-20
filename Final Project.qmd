@@ -76,4 +76,5 @@ smart_mean <- function(x) {
 	return(mean_val)
 }
 smart_mean(smart_data$Age)
+smart_mean(smart_data$Height)
 ```
