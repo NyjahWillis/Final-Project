@@ -16,20 +16,48 @@ library(gtsummary)
   library(usethis)
   	library(here)
 			library(devtools)
-				library(medicaldata)
+				library(tidyverse)
+					library(medicaldata)
 Smart <- medicaldata::smartpill
-smart_cat<- Smart |>
+smart_cc<- Smart |>
 		mutate (group_cat = factor(Group, labels = c("Critical Patient", "Healthy Volunteer")),
 						sex_cat = factor(Gender, labels = c("Female", "Male")),
 						race_cat = factor(Race, labels = c("White", "Black", "Asian/Pacific Islander", 
 																							 "Hispanic", "Other")))
-count(smart_cc, race_cat)
+quantile(smart_data$Age, probs = c(.25, .75))
+smart_data$age_cat <- factor(ifelse(is.na(smart_data$Age),NA,
+																			 ifelse(smart_data$Age <=28, 1,
+																			 			 ifelse(smart_data$Age <= 44, 2, 3))),
+																levels=1:3,
+																labels=c("28 years or younger",
+																				 "Between 29 - 43 years",
+																				 "44 and older "))
+
 ```
 
 #Table 1
 
 ```{r}
+#| label: tbl-pop_char
+#| tbl-cap: "This is a table of participant charatieristics based on sex"
+table1<- tbl_summary(
+  smart_data,
+  by = group_cat,
+  include = c(sex_cat, race_cat, age_cat),
+label = list(
+	  sex_cat ~ "Sex",
+    race_cat ~ "Race",
+    age_cat ~ "Age"
+  ),
+  missing_text = "Missing") |> 
+  add_p(test = list(all_continuous() ~ "t.test", 
+                    all_categorical() ~ "chisq.test")) |> 
+  add_overall(col_label = "**Total**") |> 
+  bold_labels() |> 
+  modify_footnote(update = everything() ~ NA) |> 
+  modify_header(label = "**Variable**", p.value = "**P**")
 
+table1
 ```
 
 The `echo: false` option disables the printing of code (only output is displayed).
