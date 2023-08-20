@@ -1,9 +1,7 @@
 ---
 title: "Final Project"
 author: "Nyjah Willis"
-  format:
-    html:
-      theme: 
+format: html
 cache: true
 ---
 
@@ -11,7 +9,8 @@ cache: true
 
 ```{r}
 #Packages 
-#| include: false
+#| echo: false
+#| message: false
 library(gtsummary)
   library(usethis)
   	library(here)
@@ -25,22 +24,22 @@ smart_cc<- Smart |>
 						sex_cat = factor(Gender, labels = c("Female", "Male")),
 						race_cat = factor(Race, labels = c("White", "Black", "Asian/Pacific Islander", 
 																							 "Hispanic", "Other")))
+smart_data <- na.omit(smart_cc)
 quantile(smart_data$Age, probs = c(.25, .75))
 smart_data$age_cat <- factor(ifelse(is.na(smart_data$Age),NA,
-																			 ifelse(smart_data$Age <=28, 1,
-																			 			 ifelse(smart_data$Age <= 44, 2, 3))),
+																ifelse(smart_data$Age <=28, 1,
+																	ifelse(smart_data$Age <= 44, 2, 3))),
 																levels=1:3,
 																labels=c("28 years or younger",
 																				 "Between 29 - 43 years",
 																				 "44 and older "))
-
 ```
 
 #Table 1
 
 ```{r}
-#| label: tbl-pop_char
-#| tbl-cap: "This is a table of participant charatieristics based on sex"
+#| label: tbl-Smart Pill
+#| tbl-cap: "This is a table of participant charatieristics by Patient Group"
 table1<- tbl_summary(
   smart_data,
   by = group_cat,
@@ -84,6 +83,7 @@ smart_mean(smart_data$Height)
 #Regressions
 
 ```{r}
+#| message: false
 linear_model <- lm(S.Contractions ~ sex_cat + age_cat + race_cat,
 									 data = smart_data)
 
@@ -105,3 +105,5 @@ tbl_regression(
 		S.Contractions ~ "S	Contractions",
 		Height ~ "Height"))
 ```
+
+

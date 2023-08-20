@@ -12,7 +12,7 @@ smart_cc<- Smart |>
 						sex_cat = factor(Gender, labels = c("Female", "Male")),
 						race_cat = factor(Race, labels = c("White", "Black", "Asian/Pacific Islander", "Hispanic", "Other")))
 
-smart_data <- na.omit(smart_cat)
+smart_data <- na.omit(smart_cc)
 
 list(smart_data$Age)
 quantile(smart_data$Age, probs = c(.25, .75))
