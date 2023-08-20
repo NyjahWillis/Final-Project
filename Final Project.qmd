@@ -18,6 +18,7 @@ library(gtsummary)
 			library(devtools)
 				library(tidyverse)
 					library(medicaldata)
+						library(broom)
 Smart <- medicaldata::smartpill
 smart_cc<- Smart |>
 		mutate (group_cat = factor(Group, labels = c("Critical Patient", "Healthy Volunteer")),
@@ -77,4 +78,30 @@ smart_mean <- function(x) {
 }
 smart_mean(smart_data$Age)
 smart_mean(smart_data$Height)
+```
+
+
+#Regressions
+
+```{r}
+linear_model <- lm(S.Contractions ~ sex_cat + age_cat + race_cat,
+									 data = smart_data)
+
+logistic_model <- glm(group_cat ~  sex_cat + S.Contractions + Height,
+											data = smart_data, family = binomial())
+tbl_regression(
+	linear_model,
+	intercept = TRUE,
+	label = list(
+		sex_cat ~ "Sex",
+		race_cat ~ "Race",
+		age_cat ~ "Age"))
+
+tbl_regression(
+	logistic_model,
+	exponentiate = TRUE,
+	label = list(
+		sex_cat ~ "Sex",
+		S.Contractions ~ "S	Contractions",
+		Height ~ "Height"))
 ```
