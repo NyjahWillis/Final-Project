@@ -1,0 +1,126 @@
+---
+title: "Final Project"
+author: "Nyjah Willis"
+format: html
+---
+
+## Intro of Dataset
+This data set was obtained through the medicaldata data package. The "Smart Pill" study is a prospective cohort study looking at the first use of a novel motility capsule to compare gastric emptying and small bowel transit times in critically ill trauma patients with intracranial hemorrhage with times recorded previously in healthy volunteers. This study enrolled 8 critically ill patient and the control group consisted of 87 healthy volunteers with no history of major abdominal surgery
+
+```{r}
+#Packages 
+#| echo: false
+#| message: false
+library(gtsummary)
+  library(usethis)
+  	library(here)
+			library(devtools)
+				library(tidyverse)
+					library(medicaldata)
+						library(broom)
+Smart <- medicaldata::smartpill
+smart_cc<- Smart |>
+		mutate (group_cat = factor(Group, labels = c("Critical Patient", "Healthy Volunteer")),
+						sex_cat = factor(Gender, labels = c("Female", "Male")),
+						race_cat = factor(Race, labels = c("White", "Black", "Asian/Pacific Islander", 
+																							 "Hispanic", "Other")))
+smart_data <- smart_cc
+quantile(smart_data$Age, probs = c(.25, .75))
+smart_data$age_cat <- factor(ifelse(is.na(smart_data$Age),NA,
+																ifelse(smart_data$Age <=28, 1,
+																	ifelse(smart_data$Age <= 44, 2, 3))),
+																levels=1:3,
+																labels=c("28 years or younger",
+																				 "Between 29 - 43 years",
+																				 "44 and older "))
+```
+
+#Table 1
+
+```{r}
+#| label: tbl-Smart_Pill
+#| tbl-cap: "This is a table of participant charatieristics by Patient Group"
+table1<- tbl_summary(
+  smart_data,
+  by = group_cat,
+  include = c(sex_cat, race_cat, age_cat),
+label = list(
+	  sex_cat ~ "Sex",
+    race_cat ~ "Race",
+    age_cat ~ "Age"
+  ),
+  missing_text = "Missing") |> 
+  add_p(test = list(all_continuous() ~ "t.test", 
+                    all_categorical() ~ "chisq.test")) |> 
+  add_overall(col_label = "**Total**") |> 
+  bold_labels() |> 
+  modify_footnote(update = everything() ~ NA) |> 
+  modify_header(label = "**Variable**", p.value = "**P**")
+
+table1
+```
+
+
+#Figure 1
+```{r}
+#| label: fig-Smart_WGTime
+#| fig-cap: This histogram is showing the frewuenct of WG Time 
+hist(smart_data$WG.Time)
+```
+
+
+#Functions 
+
+```{r}
+smart_mean <- function(x) {
+	n <-length(x)
+	mean_val <- sum(x)/n
+	return(mean_val)
+}
+smart_mean(smart_data$Age)
+smart_mean(smart_data$Height)
+```
+
+
+#Regressions
+
+```{r}
+#| message: false
+linear_model <- lm(S.Contractions ~ sex_cat + age_cat + race_cat,
+									 data = smart_data)
+
+logistic_model <- glm(group_cat ~  sex_cat + WG.Time + Height,
+											data = smart_data, family = binomial())
+tbl_regression(
+	linear_model,
+	intercept = TRUE,
+	label = list(
+		sex_cat ~ "Sex",
+		race_cat ~ "Race",
+		age_cat ~ "Age"))
+
+tbl_regression(
+	logistic_model,
+	exponentiate = TRUE,
+	label = list(
+		sex_cat ~ "Sex",
+		WG.Time ~ "GW time",
+		Height ~ "Height"))
+```
+
+#Cross referencing
+@tbl-Smart_Pill contains a table of the participants based on their group (Critical patient vs Healthy Volunteer) @fig-Smart_WGTime is showing the frequency of WG Time 
+
+#inline text
+```{r}
+#What is the percentage of Healthy Females 
+Female <- inline_text(table1,variable = "sex_cat", level= "Female", column = "Healthy Volunteer")
+#What is the percentage of Healthy Males
+Male <-inline_text(table1,variable = "sex_cat", level= "Male", column = "Healthy Volunteer")
+per <- inline_text(table1,variable = "sex_cat", level= "Male", column = "stat_0",
+									 pattern = "{n}/{N} ({p}%)")
+
+```
+
+ There are (`r Female`) Females and (`r Male`) Males in the healthy volunteer population. 
+ The overall amount of Black participants is (`r per`)
